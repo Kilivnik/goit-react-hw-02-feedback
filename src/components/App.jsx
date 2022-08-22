@@ -1,25 +1,59 @@
-import React from "react";
+import { Component } from 'react';
+import Section from 'components/Section';
+import Statistics from 'components/Statistics';
+import Notification from 'components/Notification';
+import FeedbackOptions from 'components/FeedbackOptions';
 
-import FeedbackForm from "././FeedbackForm/FeedbackForm";
-import StaticRange from "././StaticRange/StaticRange";
+class App extends Component {
+  state = {
+    good: 0,
+    neutral: 0,
+    bad: 0,
+  };
 
-export const App = () => {
-  return (
-    <div >
-      <FeedbackForm />
-      <StaticRange />
-    </div>
-  );
-};
+  onLeaveFeedback = option => {
+    this.setState(prevState => ({ [option]: prevState[option] + 1 }));
+  };
 
+  countTotalFeedback = () => {
+    return Object.values(this.state).reduce((total, value) => total + value, 0);
+  };
 
-export default App;
+  countPositiveFeedbackPercentage = () => {
+    return `${Math.round(
+      this.countTotalFeedback()
+        ? (this.state.good * 100) / this.countTotalFeedback()
+        : 0
+    )}%`;
+  };
 
-// Шаг 1
-// Приложение должно отображать количество собранных отзывов для каждой категории. 
-// Приложение не должно сохранять статистику отзывов между разными сессиями(обновление страницы).
+  render() {
+    const { good, neutral, bad } = this.state;
 
-// Состояние приложения обязательно должно быть следующего вида, добавлять новые свойства нельзя.
+    return (
+      <div>
+        <Section title="Please leave feedback">
+          <FeedbackOptions
+            options={Object.keys(this.state)}
+            onLeaveFeedback={this.onLeaveFeedback}
+          />
+        </Section>
+        <Section title="Statistics">
+          {this.countTotalFeedback() ? (
+            <Statistics
+              good={good}
+              neutral={neutral}
+              bad={bad}
+              total={this.countTotalFeedback()}
+              positivePercentage={this.countPositiveFeedbackPercentage()}
+            />
+          ) : (
+            <Notification message="There is no feedback" />
+          )}
+        </Section>
+      </div>
+    );
+  }
+}
 
-
-
+export { App };
